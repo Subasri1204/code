@@ -3,6 +3,7 @@ const http = require('http');
 const https = require('https');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 const { parse } = require('url');
+const fetch = require('node-fetch'); // Use `node-fetch` v2 for CommonJS
 
 // Utility function to parse cookies
 const parseCookies = (cookieString) => {
@@ -22,7 +23,6 @@ const PROXY_PORT = 4000; // Port where proxy server will run
 
 // Create the proxy middleware
 const nextjsProxy = createProxyMiddleware({
- // console.log(`Proxy server is running on port ${PROXY_PORT}`);
   target: `http://localhost:${NEXTJS_PORT}`,
   changeOrigin: true,
   ws: true,
@@ -32,6 +32,7 @@ const generateApigeeToken = async () => {
   const APIGEE_AUTH_URL = 'https://api.ciq3kgmonc-honeywell1-d3-public.model-t.cc.commerce.ondemand.com/authorizationserver/oauth/token';
   const CLIENT_ID = 'asm';
   const CLIENT_SECRET = '1234';
+
   const response = await fetch(APIGEE_AUTH_URL, {
     method: 'POST',
     headers: {
@@ -45,7 +46,7 @@ const generateApigeeToken = async () => {
   });
 
   if (!response.ok) {
-    throw new Error('Failed to generate Apigee token: ${response.statusText}');
+    throw new Error(`Failed to generate Apigee token: ${response.statusText}`);
   }
 
   const data = await response.json();
@@ -53,10 +54,11 @@ const generateApigeeToken = async () => {
 };
 
 const generateBinderToken = async () => {
-  const Binder_AUTH_URL = 'https://honeywell.bynder.com/v6/authentication/oauth2/token';
+  const BINDER_AUTH_URL = 'https://honeywell.bynder.com/v6/authentication/oauth2/token';
   const CLIENT_ID = 'd6aca289-4ca3-47d0-a5ed-a3e1716b062d';
   const CLIENT_SECRET = '0e07b2ae-0c90-44e9-9e94-69dd43c379a4';
-  const response = await fetch(Binder_AUTH_URL, {
+
+  const response = await fetch(BINDER_AUTH_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/x-www-form-urlencoded'
@@ -71,24 +73,23 @@ const generateBinderToken = async () => {
   if (!response.ok) {
     throw new Error(`Failed to generate Bynder token: ${response.statusText}`);
   }
+
   const data = await response.json();
   return data.access_token;
 };
 
-
-const requestListener = async(req, res) => {
+const requestListener = async (req, res) => {
   const { method, headers, url } = req;
   const basePath = '/server1'; // Adjust this based on your setup
   const parsedUrl = parse(url);
   const apiPath = parsedUrl.pathname.replace(basePath, '');
   const queryString = parsedUrl.query ? '?' + parsedUrl.query : '';
   const fullUrl = `${apiPath}${queryString}`;
-  //const fullUrl = `${apiPath}${queryString ? '?' + queryString : ''}`;
 
   // Get cookies from the headers
   const cookies = headers.cookie ? parseCookies(headers.cookie) : {};
   // Access specific cookies
-  const token = cookies["2391-token"] || "ewogICJ0eXAiIDogIkpXVCIsCiAgImFsZyIgOiAiUlMyNTYiCn0.ewogICJkb21haW4iIDogIjIzOTEiLAogICJhcHBJZCIgOiAiMjM5IiwKICAiaXNzIiA6ICJidWlsZGluZ3NidC5zdGFnZS5ob25leXdlbGwuY29tIiwKICAianRpIiA6ICIwNGI5ZTllMS02Y2I1LTQzM2EtYmVkMS00NDUyNjcyMzM2NjciLAogICJzdWIiIDogImQ3YTE1YTU5LTZhNGItNDFkMS1iYmI0LTNiYmQ5Y2ViOGI0YyIsCiAgImlhdCIgOiAxNzI0ODM5NzYyLAogICJleHAiIDogMTcyNDg0MTU2Mgp9.Y2QvrcFkFPyy5s7qzb5yL7LZrKmbphEQLRqonUykfyLRw2FI_N9nHUYLxZOIRmMolBTXeTmg2bvh59nBX7Rl_RM-BCocqYhSeQ49TnhCZ6ybJeQmeGx3BtvfP_IHHdQlNLRbQXABzCzVwWryx97KLU1z-CrZTGiv8plu7wCab_cNlhj3lN_2r2LAOnyNdPpBiS_4Hu2FcbJaFsXQX9BnZgd-FH4D-oej0P5P6tWbC137jrb5k5obb6LSdaLSRMlnovWn9G9rKr--fJ_BBOCILaZaHSXQi-FhjbkM9uhvpPbiWjuS_JxrwaStWFe4sZqQS9UL6Gicy1hSTZOLwiyNSg";
+  const token = cookies["2391-token"] || "default_token";
 
   if (apiPath.includes("/pif/")) {
     if (method === 'OPTIONS') {
@@ -100,8 +101,7 @@ const requestListener = async(req, res) => {
       });
       res.end();
     } else {
-      const targetURL = "https://buildingsbt.stage.honeywell.com" + fullUrl;
-      //const targetURL = `https://buildingsbt.stage.honeywell.com${fullUrl}`;
+      const targetURL = `https://buildingsbt.stage.honeywell.com${fullUrl}`;
       const cookieVal = "2391-token=" + token;
       let requestData = '';
 
@@ -127,7 +127,6 @@ const requestListener = async(req, res) => {
           });
 
           response.on('end', () => {
-            // Check the content type before parsing
             const contentType = response.headers['content-type'];
 
             if (contentType && contentType.includes('application/json')) {
@@ -172,33 +171,22 @@ const requestListener = async(req, res) => {
         request.end();
       });
     }
-  } 
-
-  else if (apiPath.includes("/productDetails/")) {
+  } else if (apiPath.includes("/productDetails/")) {
     try {
-      const httpMethod = req.method;
-      // Ensure apigee_token is defined
       const apigee_token = await generateApigeeToken();
+      const targetURL = `https://api.ciq3kgmonc-honeywell1-d3-public.model-t.cc.commerce.ondemand.com/honeywellwebservices/v2/honeywell${apiPath}${queryString}`;
 
-      // New API handling logic
-     // const targetURL = `https://api.ciq3kgmonc-honeywell1-d3-public.model-t.cc.commerce.ondemand.com/honeywellwebservices/v2/honeywell${apiPath}${queryString ? '?' + queryString : ''}`;
-     const targetURL = `https://api.ciq3kgmonc-honeywell1-d3-public.model-t.cc.commerce.ondemand.com/honeywellwebservices/v2/honeywell${apiPath}${queryString ? queryString : ''}`;
-      console.log('HTTP Method:', httpMethod);
+      console.log('HTTP Method:', method);
       console.log('Target URL:', targetURL);
       console.log('Apigee Token:', apigee_token);
-      //console.log('Target URL:', targetURL, 'Apigee Token:', apigee_token);
 
       const response = await fetch(targetURL, {
-        method: httpMethod,
+        method: method,
         headers: {
           'Authorization': "Bearer " + apigee_token,
         }
       });
 
-     //if (!response.ok) {
-       // console.error(`Response not OK. Status: ${response.status}. Text: ${response.statusText}`);
-        //throw new Error(`HTTP error! status: ${response.status}`);
-      //}
       if (!response.ok) {
         console.error(`Response not OK. Status: ${response.status}. Text: ${response.statusText}`);
         res.writeHead(response.status, {
@@ -212,20 +200,12 @@ const requestListener = async(req, res) => {
       const data = await response.json();
       console.log('Response data:', data);
 
-      //return {
-        //statusCode: 200,
-        //headers: {
-          //'Access-Control-Allow-Origin': '*'
-        //},
-        //body: JSON.stringify(data)
-      //};
       res.writeHead(200, {
         'Access-Control-Allow-Origin': '*',
         'Content-Type': 'application/json',
       });
       res.end(JSON.stringify(data));
-  
-    
+
     } catch (error) {
       console.error('Fetch error:', error);
       res.writeHead(500, {
@@ -233,28 +213,17 @@ const requestListener = async(req, res) => {
         'Content-Type': 'application/json',
       });
       res.end(JSON.stringify({ message: 'Internal Server Error', error: error.message }));
-      //return {
-        //statusCode: 500,
-       // headers: {
-          //'Access-Control-Allow-Origin': '*'
-       // },
-        //body: JSON.stringify({ message: 'Internal Server Error', error: error.message })
-      //};
     }
-  } 
-  else if (apiPath.includes("/download/")) {
-    const httpMethod = req.method;
+  } else if (apiPath.includes("/download/")) {
     try {
-      // Ensure binder_token is defined
       const binder_token = await generateBinderToken();
+      const targetURL = `https://honeywell.bynder.com/api/v4/media/DA1CA705-D8BE-434F-9C08F7A226DA6950${apiPath}${queryString}`;
 
-      // New API handling logic
-      const targetURL = `https://honeywell.bynder.com/api/v4/media/DA1CA705-D8BE-434F-9C08F7A226DA6950${apiPath}${queryString ? '?' + queryString : ''}`;
-
-      console.log('Binder Target URL:', targetURL, 'binder_token:', binder_token);
+      console.log('Binder Target URL:', targetURL);
+      console.log('Binder Token:', binder_token);
 
       const response = await fetch(targetURL, {
-        method: httpMethod,
+        method: method,
         headers: {
           'Authorization': "Bearer " + binder_token,
         }
@@ -272,8 +241,7 @@ const requestListener = async(req, res) => {
         'Content-Type': 'application/json',
       });
       res.end(JSON.stringify(data));
-  
-    
+
     } catch (error) {
       console.error('Fetch error:', error);
       res.writeHead(500, {
@@ -281,17 +249,8 @@ const requestListener = async(req, res) => {
         'Content-Type': 'application/json',
       });
       res.end(JSON.stringify({ message: 'Internal Server Error', error: error.message }));
-      //return {
-        //statusCode: 500,
-       // headers: {
-          //'Access-Control-Allow-Origin': '*'
-       // },
-        //body: JSON.stringify({ message: 'Internal Server Error', error: error.message })
-      //};
     }
-  } 
-  
-  else {
+  } else {
     // Forward all other requests to the Next.js server
     nextjsProxy(req, res, (err) => {
       if (err) {
@@ -306,5 +265,4 @@ const server = http.createServer(requestListener);
 
 server.listen(PROXY_PORT, () => {
   console.log(`Proxy server is running on port ${PROXY_PORT}`);
-
 });
