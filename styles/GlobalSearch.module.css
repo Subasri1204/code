@@ -1,0 +1,201 @@
+.header {
+    text-align: center;
+    margin-bottom: 80px
+}
+.mainContentWrapper {
+  width: 90%; /* Full width including facets and results */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.searchSection {
+  display: flex;
+  justify-content: flex-end; /* Align search input and button to the right */
+  margin-bottom: 20px;
+}
+
+.searchContainer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center; /* Vertically center search input and button */
+  width: 100%;
+}
+
+
+.resultsAndFacets {
+  display: flex;
+}
+
+.facetsContainer {
+  width: 20%; /* Facets take 25% of the width */
+  padding-right: 20px;
+  border-right: 1px solid #ddd;
+}
+
+.resultsContainer {
+  width: 75%; /* Results take 75% of the width */
+  padding-left: 20px;
+}
+
+/*
+.productSection,
+.skuSection {
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  background-color: #f9f9f9;
+}
+
+.productHeader,
+.skuHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.productList,
+.skuList {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+}
+
+.productItem,
+.skuItem {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  margin: 5px;
+  width: 25%;
+}
+
+.thumbnail {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-top: 10px;
+}
+*/
+.productSection {
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    background-color: #f9f9f9;
+}
+
+.productHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.productList {
+    display: flex; /* Display items in a flex container */
+    flex-direction: column; /* Change to column to stack vertically */
+}
+
+.productItem {
+    display: flex; /* Keep product items in a row */
+    flex-direction: row; /* Arrange image and details side by side */
+    align-items: center; /* Vertically aligns items */
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    margin: 5px 0; /* Space between product items */
+    width: 100%; /* Full width for each product item */
+}
+
+.productImage {
+    flex: 0 0 auto; /* Maintain fixed size for the image */
+    margin-right: 10px; /* Space between image and text */
+}
+
+.productDetails {
+    flex: 1; /* Fills the rest of the space for text */
+}
+
+.learnMore {
+  margin-top: auto;
+  font-weight: bold;
+  text-align: left;
+}
+
+.navigation {
+  margin-top: 10px;
+  text-align: center;
+}
+
+.searchInput {
+    width: 70%; /* Adjust width as needed */
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add shadow */
+}
+
+.searchButton {
+    padding: 10px 20px;
+    background-color: #007bff; /* Blue background */
+    color: white; /* White text */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 10px;
+    font-size: 16px;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); /* Optional: Add shadow */
+}
+
+.searchButton:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+.shortDescription {
+    font-family:'Arial Narrow', Arial, sans-serif;
+    font-size:medium;
+}
+.skuList {
+    font-family: 'Arial Narrow', Arial, sans-serif;
+    font-size: medium;
+    font-weight:bold;
+}
+.tabContainer {
+    display: flex;
+    margin-bottom: 10px;
+}
+
+.tabButton {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    border-radius: 4px;
+    background-color: #e0e0e0;
+    cursor: pointer;
+    margin-right: 5px;
+}
+
+    .tabButton:last-child {
+        margin-right: 0;
+    }
+
+    .tabButton:hover {
+        background-color: #d0d0d0;
+    }
+
+.active {
+    background-color: #007BFF; /* Highlighted color */
+    color: white;
+}
+.pdfIcon {
+    width: 50px; /* Adjust the size as needed */
+    height: 50px; /* Adjust the size as needed */
+    margin-right: 8px; /* Spacing between icon and text */
+}

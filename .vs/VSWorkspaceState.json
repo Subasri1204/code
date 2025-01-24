@@ -1,0 +1,15 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\app",
+    "\\app\\api",
+    "\\app\\api\\eamsearch",
+    "\\app\\api\\nativesearch",
+    "\\app\\eam",
+    "\\app\\eam\\components",
+    "\\app\\global-search",
+    "\\app\\global-search\\components"
+  ],
+  "SelectedNode": "\\app\\api\\eamsearch\\route.js",
+  "PreviewInSolutionExplorer": false
+}
